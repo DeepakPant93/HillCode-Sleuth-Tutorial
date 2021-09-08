@@ -1,5 +1,6 @@
 package com.hillcode.example.sleuth.demo;
 
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,11 +47,20 @@ public class Resource {
 	public String newSpan(@PathVariable("id") String id) {
 		log.info("Hi - {}", id);
 
-		Span span = this.tracer.nextSpan(TraceContextOrSamplingFlags
-				.newBuilder(TraceContext.newBuilder().traceIdHigh(Long.MAX_VALUE).traceId(Long.valueOf(id)).spanId(Long.valueOf(id)).build())
-				.build()).name("user-id").start();
+		Span span = this.tracer.nextSpan(TraceContextOrSamplingFlags.newBuilder(TraceContext.newBuilder()
+				.traceIdHigh(Long.MAX_VALUE).traceId(Long.valueOf(id)).spanId(Long.valueOf(id)).build()).build())
+				.name("user-id").start();
 		tracer.withSpanInScope(span.start());
 
+		log.info("This is final Hi - {}", id);
+		return "Done";
+	}
+
+	@GetMapping(value = "/new-id/{id}")
+	public String newId(@PathVariable("id") String id) {
+
+		// MDC is responsible to print the userId in logs
+		MDC.put("userId", id);
 		log.info("This is final Hi - {}", id);
 		return "Done";
 	}
